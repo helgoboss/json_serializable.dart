@@ -77,8 +77,10 @@ abstract class EncodeHelper implements HelperCore {
       ..writeln('=> <String, dynamic>{')
       ..writeAll(fields.map((field) {
         final access = _fieldAccess(field);
-        final value =
-            '${safeNameAccess(field)}: ${_serializeField(field, access)}';
+        final jsonKey = jsonKeyFor(field);
+        final value = jsonKey.flatten
+          ? '...${_serializeField(field, access)}.toJson()'
+          : '${safeNameAccess(field)}: ${_serializeField(field, access)}';
         return '        $value,\n';
       }))
       ..writeln('};');

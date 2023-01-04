@@ -226,18 +226,18 @@ abstract class DecodeHelper implements HelperCore {
           !checkedProperty,
           'should only be true if `_generator.checked` is true.',
         );
-
-        value = deserialize(
-          readValueFunc == null
-              ? 'json[$jsonKeyName]'
-              : '$readValueFunc(json, $jsonKeyName)',
-        );
+        final String expression;
+        if (readValueFunc == null) {
+          expression = jsonKey.flatten ? 'json' : 'json[$jsonKeyName]';
+        } else {
+          expression = '$readValueFunc(json, $jsonKeyName)';
+        }
+        value = deserialize(expression);
       }
     } on UnsupportedTypeError catch (e) // ignore: avoid_catching_errors
     {
       throw createInvalidGenerationError('fromJson', field, e);
     }
-
     if (defaultValue != null) {
       if (jsonKey.disallowNullValue && jsonKey.required) {
         log.warning('The `defaultValue` on field `${field.name}` will have no '
