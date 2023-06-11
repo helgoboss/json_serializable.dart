@@ -28,7 +28,7 @@ abstract class HelperCore {
 
   @protected
   String get targetClassReference =>
-      '${element.name}${genericClassArgumentsImpl(false)}';
+      '${element.name}${genericClassArgumentsImpl(withConstraints: false)}';
 
   @protected
   String nameAccess(FieldElement field) => jsonKeyFor(field).name;
@@ -45,7 +45,7 @@ abstract class HelperCore {
   ///
   /// Returns the output of calling [genericClassArguments] with [element].
   @protected
-  String genericClassArgumentsImpl(bool withConstraints) =>
+  String genericClassArgumentsImpl({required bool withConstraints}) =>
       genericClassArguments(element, withConstraints);
 
   @protected
@@ -77,8 +77,9 @@ $converterOrKeyInstructions
   } else if (field.type != error.type) {
     message = '$message because of type `${typeToCode(error.type)}`';
   } else {
+    final element = error.type.element?.name;
     todo = '''
-To support the type `${error.type.element2!.name}` you can:
+To support the type `${element ?? error.type}` you can:
 $converterOrKeyInstructions''';
   }
 

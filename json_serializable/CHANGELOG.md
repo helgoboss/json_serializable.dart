@@ -1,3 +1,27 @@
+## 6.7.0
+
+- Support `Record` types.
+- Require Dart 3.0
+- Require `analyzer: ^5.12.0`
+
+## 6.6.2
+
+- Better handling of `Object?` or `dynamic` as `fromJson` constructor param.
+- Require Dart 2.19
+
+## 6.6.1
+
+- Fix bug when `JsonKey.includeToJson` is `false`.
+
+## 6.6.0
+
+- Support for `JsonKey.includeFromJson` and `JsonKey.includeToJson`.
+- Support `JsonEnum.valueField` being set with `'index'`.
+- Support `JsonSerializable.createPerFieldToJson`.
+- Require Dart SDK `>=2.18.0`.
+- Require `analyzer: ^5.2.0`
+- Require `json_annotation: '>=4.8.0 <4.9.0'`
+
 ## 6.5.4
 
 - Fixed handling of nullable fields with converters which return non-nullable
@@ -20,7 +44,7 @@
 ## 6.5.0
 
 - Allow constructors to be passed to `JsonKey` parameters that support
-  `Function` types. 
+  `Function` types.
 - Accept `Function` values for `JsonKey.defaultValue`. The provided
   `Function` will be invoked for the default value if the target JSON element is
   missing or `null`.

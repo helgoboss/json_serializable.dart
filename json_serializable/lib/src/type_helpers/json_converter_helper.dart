@@ -11,7 +11,6 @@ import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
 import '../lambda_result.dart';
-import '../shared_checkers.dart';
 import '../type_helper.dart';
 import '../utils.dart';
 
@@ -65,8 +64,6 @@ Json? $converterToJsonName<Json, Value>(
       return null;
     }
 
-    final asContent = asStatement(converter.jsonType);
-
     if (!converter.jsonType.isNullableType && targetType.isNullableType) {
       const converterFromJsonName = r'_$JsonConverterFromJson';
       context.addMember('''
@@ -88,7 +85,7 @@ Value? $converterFromJsonName<Json, Value>(
     return LambdaResult(
       expression,
       '${converter.accessString}.fromJson',
-      asContent: asContent,
+      asContent: converter.jsonType,
     );
   }
 }
@@ -217,7 +214,7 @@ _JsonConvertData? _typeConverterFrom(
 
   final annotationElement = match.elementAnnotation?.element;
   if (annotationElement is PropertyAccessorElement) {
-    final enclosing = annotationElement.enclosingElement3;
+    final enclosing = annotationElement.enclosingElement;
 
     var accessString = annotationElement.name;
 
@@ -244,7 +241,7 @@ _JsonConvertData? _typeConverterFrom(
 
   if (match.genericTypeArg != null) {
     return _JsonConvertData.genericClass(
-      match.annotation.type!.element2!.name!,
+      match.annotation.type!.element!.name!,
       match.genericTypeArg!,
       reviver.accessor,
       match.jsonType,
@@ -253,7 +250,7 @@ _JsonConvertData? _typeConverterFrom(
   }
 
   return _JsonConvertData.className(
-    match.annotation.type!.element2!.name!,
+    match.annotation.type!.element!.name!,
     reviver.accessor,
     match.jsonType,
     match.fieldType,
@@ -281,18 +278,18 @@ _ConverterMatch? _compatibleMatch(
   ElementAnnotation? annotation,
   DartObject constantValue,
 ) {
-  final converterClassElement = constantValue.type!.element2 as ClassElement;
+  final converterClassElement = constantValue.type!.element as ClassElement;
 
   final jsonConverterSuper =
       converterClassElement.allSupertypes.singleWhereOrNull(
-    (e) => _jsonConverterChecker.isExactly(e.element2),
+    (e) => _jsonConverterChecker.isExactly(e.element),
   );
 
   if (jsonConverterSuper == null) {
     return null;
   }
 
-  assert(jsonConverterSuper.element2.typeParameters.length == 2);
+  assert(jsonConverterSuper.element.typeParameters.length == 2);
   assert(jsonConverterSuper.typeArguments.length == 2);
 
   final fieldType = jsonConverterSuper.typeArguments[0];
@@ -323,7 +320,7 @@ _ConverterMatch? _compatibleMatch(
       annotation,
       constantValue,
       jsonConverterSuper.typeArguments[1],
-      '${targetType.element2.name}${targetType.isNullableType ? '?' : ''}',
+      '${targetType.element.name}${targetType.isNullableType ? '?' : ''}',
       fieldType,
     );
   }

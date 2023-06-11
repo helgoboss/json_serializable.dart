@@ -32,13 +32,14 @@ Never throwUnsupported(FieldElement element, String message) =>
       element: element,
     );
 
-FieldRename? _fromDartObject(ConstantReader reader) => reader.isNull
-    ? null
-    : enumValueForDartObject(
-        reader.objectValue,
-        FieldRename.values,
-        (f) => f.toString().split('.')[1],
-      );
+T? readEnum<T extends Enum>(ConstantReader reader, List<T> values) =>
+    reader.isNull
+        ? null
+        : enumValueForDartObject<T>(
+            reader.objectValue,
+            values,
+            (f) => f.name,
+          );
 
 T enumValueForDartObject<T>(
   DartObject source,
@@ -57,10 +58,12 @@ JsonSerializable _valueForAnnotation(ConstantReader reader) => JsonSerializable(
       createFactory: reader.read('createFactory').literalValue as bool?,
       createToJson: reader.read('createToJson').literalValue as bool?,
       createFieldMap: reader.read('createFieldMap').literalValue as bool?,
+      createPerFieldToJson:
+          reader.read('createPerFieldToJson').literalValue as bool?,
       disallowUnrecognizedKeys:
           reader.read('disallowUnrecognizedKeys').literalValue as bool?,
       explicitToJson: reader.read('explicitToJson').literalValue as bool?,
-      fieldRename: _fromDartObject(reader.read('fieldRename')),
+      fieldRename: readEnum(reader.read('fieldRename'), FieldRename.values),
       genericArgumentFactories:
           reader.read('genericArgumentFactories').literalValue as bool?,
       ignoreUnannotated: reader.read('ignoreUnannotated').literalValue as bool?,
@@ -103,6 +106,8 @@ ClassConfig mergeConfig(
     createFactory: annotation.createFactory ?? config.createFactory,
     createToJson: annotation.createToJson ?? config.createToJson,
     createFieldMap: annotation.createFieldMap ?? config.createFieldMap,
+    createPerFieldToJson:
+        annotation.createPerFieldToJson ?? config.createPerFieldToJson,
     disallowUnrecognizedKeys:
         annotation.disallowUnrecognizedKeys ?? config.disallowUnrecognizedKeys,
     explicitToJson: annotation.explicitToJson ?? config.explicitToJson,
@@ -160,16 +165,15 @@ ConstructorElement constructorByName(ClassElement classElement, String name) {
 ///
 /// Otherwise, `null`.
 Iterable<FieldElement>? iterateEnumFields(DartType targetType) {
-  if (targetType is InterfaceType && targetType.element2 is EnumElement) {
-    return targetType.element2.fields
-        .where((element) => element.isEnumConstant);
+  if (targetType is InterfaceType && targetType.element is EnumElement) {
+    return targetType.element.fields.where((element) => element.isEnumConstant);
   }
   return null;
 }
 
 extension DartTypeExtension on DartType {
   DartType promoteNonNullable() =>
-      element2?.library?.typeSystem.promoteToNonNull(this) ?? this;
+      element?.library?.typeSystem.promoteToNonNull(this) ?? this;
 }
 
 String ifNullOrElse(String test, String ifNull, String ifNotNull) =>
@@ -203,11 +207,11 @@ String typeToCode(
   DartType type, {
   bool forceNullable = false,
 }) {
-  if (type.isDynamic) {
+  if (type is DynamicType) {
     return 'dynamic';
   } else if (type is InterfaceType) {
     return [
-      type.element2.name,
+      type.element.name,
       if (type.typeArguments.isNotEmpty)
         '<${type.typeArguments.map(typeToCode).join(', ')}>',
       (type.isNullableType || forceNullable) ? '?' : '',
@@ -229,15 +233,15 @@ extension ExecutableElementExtension on ExecutableElement {
     }
 
     if (this is MethodElement) {
-      return '${enclosingElement3.name}.$name';
+      return '${enclosingElement.name}.$name';
     }
 
     if (this is ConstructorElement) {
       // Ignore the default constructor.
       if (name.isEmpty) {
-        return '${enclosingElement3.name}';
+        return '${enclosingElement.name}';
       }
-      return '${enclosingElement3.name}.$name';
+      return '${enclosingElement.name}.$name';
     }
 
     throw UnsupportedError(
