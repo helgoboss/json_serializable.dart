@@ -112,8 +112,14 @@ mixin EncodeHelper implements HelperCore {
 
           final maybeQuestion = _canWriteJsonWithoutNullCheck(field) ? '' : '?';
 
-          final keyValuePair = '$keyExpression: $maybeQuestion$valueExpression';
-          return '        $keyValuePair,\n';
+          final jsonKey = jsonKeyFor(field);
+          if (jsonKey.flatten) {
+            final spreadMap = '...$valueExpression.toJson()';
+            return '        $spreadMap,\n';
+          } else {
+            final keyValuePair = '$keyExpression: $maybeQuestion$valueExpression';
+            return '        $keyValuePair,\n';
+          }
         }),
       )
       ..writeln('};');

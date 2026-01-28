@@ -239,11 +239,13 @@ mixin DecodeHelper implements HelperCore {
           'should only be true if `_generator.checked` is true.',
         );
 
-        value = deserialize(
-          readValueFunc == null
-              ? 'json[$jsonKeyName]'
-              : '$readValueFunc(json, $jsonKeyName)',
-        );
+        final String expression;
+        if (readValueFunc == null) {
+          expression = jsonKey.flatten ? 'json' : 'json[$jsonKeyName]';
+        } else {
+          expression = '$readValueFunc(json, $jsonKeyName)';
+        }
+        value = deserialize(expression);
       }
     } on UnsupportedTypeError catch (e) // ignore: avoid_catching_errors
     {

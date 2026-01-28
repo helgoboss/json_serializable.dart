@@ -26,6 +26,8 @@ class KeyConfig {
 
   final String? readValueFunctionName;
 
+  final bool flatten;
+
   KeyConfig({
     required this.defaultValue,
     required this.disallowNullValue,
@@ -36,6 +38,7 @@ class KeyConfig {
     required this.readValueFunctionName,
     required this.required,
     required this.unknownEnumValue,
+    required this.flatten,
   });
 }
 
