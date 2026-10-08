@@ -94,6 +94,7 @@ const _expectedAnnotatedTests = {
   'FieldWithFromJsonCtorAndTypeParams',
   'FinalFields',
   'FinalFieldsNotSetInCtor',
+  'FlattenBasic',
   'FromDynamicCollection',
   'FromNullableDynamicCollection',
   'GeneralTestClass1',

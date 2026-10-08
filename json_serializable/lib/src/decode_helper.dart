@@ -263,10 +263,12 @@ mixin DecodeHelper implements HelperCore {
           'should only be true if `_generator.checked` is true.',
         );
 
-        final jsonValueExpression = readValueFunc == null
-            ? 'json[$jsonKeyName]'
-            : '$readValueFunc(json, $jsonKeyName)';
-
+        final String jsonValueExpression;
+        if (readValueFunc == null) {
+          jsonValueExpression = jsonKey.flatten ? 'json' : 'json[$jsonKeyName]';
+        } else {
+          jsonValueExpression = '$readValueFunc(json, $jsonKeyName)';
+        }
         final deserializeValue = deserialize(
           jsonValueExpression,
           patchPresentValue: patchTriState,
